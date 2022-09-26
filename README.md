@@ -1,2 +1,2 @@
 # nuage
-Cloud deployment of containerized application
+Cloud deployment of containerized applications
