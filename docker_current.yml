@@ -1,0 +1,143 @@
+#usage : docker compose -f <file.yml> up -d
+version: '3.9'
+services:
+
+  #PHP service
+  app:
+    build:
+      args:
+        user: bis
+        uid: 1001
+      context: .
+      dockerfile: Dockerfile
+    image: bis-php:1.0
+    container_name: app-bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAG: dev
+    working_dir: /var/www
+    volumes:
+      - ./bis-binae:/var/www
+    networks:
+      - app-network
+
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: nginx_bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./bis-binae:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d
+        #- ./nginx.conf.d/:/etc/nginx/conf.d/
+    #depends_on:
+    #- app
+    #- db_admin
+    #- db_math
+    #- db_biblio
+    networks:
+      - app-network
+
+  # Biblio MariaDB Service
+  db_biblio:
+    image: mariadb:10.10-rc
+    container_name: Biblio_MariaDB_bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_DATABASE: biblio_bis-binae
+      MARIADB_USER: sergei
+      MARIADB_PASSWORD: tr1f#n0v1c
+      MARIADB_ROOT_PASSWORD: prout
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - db_biblio:/var/lib/mysql
+      - ./docker-compose/mysql/biblio:/docker-entrypoint-initdb.d 
+        #- ./mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+
+  # Cours de Math MariaDB_bis
+  db_math:
+    image: mariadb:10.10-rc
+    container_name: Math_MariaDB_bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - 3307:3306
+    environment:
+      MARIADB_DATABASE: math_bis-binae
+      MARIADB_USER: sergei
+      MARIADB_PASSWORD: tr1f#n0v1c
+      MARIADB_ROOT_PASSWORD: prout
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - db_math:/var/lib/mysql
+      - ./docker-compose/mysql/math:/docker-entrypoint-initdb.d 
+        #- ./mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+
+
+  # phpmyadmin service
+  db_admin:
+    image: phpmyadmin:5.2.0-fpm-alpine
+    container_name: phpmyadmin_bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+  # Vault service
+  vault:
+    image: vault:1.11.3
+    container_name: Vault_bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - 8200:8200
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_DEV_ROOT_TOKEN_ID: "vault-plaintext-root-token"
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - app-network
+
+  # Consul service
+  consul:
+    image: consul:1.3.1
+    container_name: Consul_bis
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+#Docker Network
+networks:
+  app-network:
+    driver: bridge
+
+# Volumes 
+volumes:
+  db_biblio:
+    driver: local
+  db_math:
+    driver: local
