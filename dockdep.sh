@@ -50,12 +50,13 @@ composer global require laravel/installer
 composer global require laravel/laravel
       
   #create a project
+cd ~
 composer create-project --prefer-dist laravel/laravel bis-binae 
 echo
 cd bis-binae
 composer require barryvdh/laravel-debugbar --dev 
-sed -e '162i\\        Barryvdh\\Debugbar\\ServiceProvider::class,' -i /home/ubuntu/bis-binae/config/app.php
-sed -e '17i\\    Debugbar::error("INFO!");' -i /home/ubuntu/bis-binae/routes/web.php
+sudo sed -e '162i\\        Barryvdh\\Debugbar\\ServiceProvider::class,' -i /home/ubuntu/bis-binae/config/app.php
+sudo sed -e '17i\\    Debugbar::error("INFO!");' -i /home/ubuntu/bis-binae/routes/web.php
       #sudo -u vagrant npm install -D tailwindcss postcss autoprefixer
       #sudo -u vagrant npx init
       #php artisan serve 2>&1 &
@@ -66,5 +67,6 @@ sed -e '17i\\    Debugbar::error("INFO!");' -i /home/ubuntu/bis-binae/routes/web
 #cp -r /vagrant/docker_current.yml /home/vagrant/
 #cd /home/vagrant
 #docker build -t bis-binae:1.0
-#docker compose -f docker_current.yml up -d 
+cd nuage
+docker compose -f docker_current.yml up -d 
 
